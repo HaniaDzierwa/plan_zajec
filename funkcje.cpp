@@ -5,24 +5,28 @@
 #include <sstream>
 #include <list>
 #include <utility>
+#include <tuple>
+
 
 #include "funkcje.h"
 #include "struktury.h"
 
 using namespace std;
 
-bool wczytaj_wszystko1(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Przedmiot>& lista_przedmiotow, list <Zajecia>& lista_zajec)
+bool wczytaj_wszystko(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Przedmiot>& lista_przedmiotow, list <Zajecia>& lista_zajec,
+	tuple<string,string,string,string> nazwy_plikow)
 {
+	
 	return
-		wczytaj_prowadzacych(lista_prowadzacych) &&
-		wczytaj_grupy(lista_grup) &&
-		wczytaj_przedmioty(lista_przedmiotow) &&
-		wczytaj_zajecia(lista_zajec, lista_prowadzacych, lista_grup, lista_przedmiotow);
+		wczytaj_prowadzacych(lista_prowadzacych, get<0>(nazwy_plikow)) &&
+		wczytaj_grupy(lista_grup,get<1>(nazwy_plikow)) &&
+		wczytaj_przedmioty(lista_przedmiotow, get<2>(nazwy_plikow)) &&
+		wczytaj_zajecia(lista_zajec, lista_prowadzacych, lista_grup, lista_przedmiotow,get<3>(nazwy_plikow));
 
 }
-bool wczytaj_prowadzacych(list <Prowadzacy>& lista_prowadzacych)
+bool wczytaj_prowadzacych(list <Prowadzacy>& lista_prowadzacych,string nazwa_pliku_prowadzacych)
 {
-	fstream plik("prowadzacy.txt", ios::in);
+	fstream plik(nazwa_pliku_prowadzacych, ios::in);
 
 	if (plik.good())
 	{
@@ -49,9 +53,9 @@ bool wczytaj_prowadzacych(list <Prowadzacy>& lista_prowadzacych)
 
 	return true;
 }
-bool wczytaj_grupy(list <Grupa>& lista_grup)
+bool wczytaj_grupy(list <Grupa>& lista_grup, string nazwa_pliku_grup)
 {
-	fstream plik("grupy.txt", ios::in);
+	fstream plik(nazwa_pliku_grup, ios::in);
 
 	if (plik.good())
 	{
@@ -77,9 +81,9 @@ bool wczytaj_grupy(list <Grupa>& lista_grup)
 	}
 	return true;
 }
-bool wczytaj_przedmioty(list <Przedmiot>& lista_przedmiotow)
+bool wczytaj_przedmioty(list <Przedmiot>& lista_przedmiotow, string nazwa_pliku_przedmiotow)
 {
-	fstream plik("przedmioty.txt", ios::in);
+	fstream plik(nazwa_pliku_przedmiotow, ios::in);
 
 	if (plik.good())
 	{
@@ -108,9 +112,10 @@ bool wczytaj_przedmioty(list <Przedmiot>& lista_przedmiotow)
 	}
 	return true;
 }
-bool wczytaj_zajecia(list<Zajecia>& lista_zajec, list<Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list<Przedmiot>& lista_przedmiotow)
+bool wczytaj_zajecia(list<Zajecia>& lista_zajec, list<Prowadzacy>& lista_prowadzacych, 
+	list<Grupa>& lista_grup, list<Przedmiot>& lista_przedmiotow, string nazwa_pliku_zajec)
 {
-	fstream plik("zajecia.txt", ios::in);
+	fstream plik(nazwa_pliku_zajec, ios::in);
 
 	if (plik.good())
 	{
@@ -471,7 +476,7 @@ void pokaz_plan_przedmiotu(list<Zajecia>& lista_zajec, Przedmiot* wybrany)
 			<< zajecia->grupa->nazwa << " " << " prowadzacy:" << zajecia->prowadzacy->nazwisko << " " << zajecia->prowadzacy->imie << "\n";
 	}
 }
-void wybierz_dzien(list<Zajecia>& lista_zajec, bool tymczasowy)
+void wybierz_dzien(list<Zajecia>& lista_zajec)
 {
 	list <Zajecia*>	danego_dnia;
 
@@ -624,7 +629,7 @@ void wybierz_przedmiot(list<Przedmiot>& lista_przedmiotow, list<Zajecia> lista_z
 
 
 }
-void wybierz_sale(list<Zajecia>& lista_zajec, list<Przedmiot>& lista_pzedmiotow, bool tymczasowy)
+void wybierz_sale(list<Zajecia>& lista_zajec, list<Przedmiot>& lista_pzedmiotow)
 {
 	int wybor;
 	cout << "Wybierz sale\n";
@@ -704,10 +709,10 @@ void wybierz_kryterium(list<Zajecia>& lista_zajec, list<Przedmiot>& lista_przedm
 			break;
 
 		case 2:
-			wybierz_dzien(lista_zajec, true);
+			wybierz_dzien(lista_zajec);
 			break;
 		case 3:
-			wybierz_sale(lista_zajec, lista_przedmiotow, true);
+			wybierz_sale(lista_zajec, lista_przedmiotow);
 			break;
 		case 4:
 			cout << "Powrot do menu";
@@ -771,7 +776,7 @@ void glowna_petla(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup
 			wybierz_kryterium(lista_zajec, lista_przedmiotow);
 			break;
 		case 5:
-			wybierz_modifikacje(lista_prowadzacych, lista_grup, lista_przedmiotow, lista_zajec, 1);
+			wybierz_modifikacje(lista_prowadzacych, lista_grup, lista_przedmiotow, lista_zajec);
 
 			break;
 
@@ -785,7 +790,7 @@ void glowna_petla(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup
 		cout << endl;
 	}
 }
-int dodaj_zajecie(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Przedmiot>& lista_przedmiotow, list <Zajecia>& lista_zajec, double tym)
+int dodaj_zajecie(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Przedmiot>& lista_przedmiotow, list <Zajecia>& lista_zajec)
 {
 	cout << "Wybierz prowadzacego\n";
 	auto it_prowadzacego = lista_prowadzacych.begin();
@@ -846,7 +851,7 @@ int dodaj_zajecie(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup
 	}
 
 
-	if (dzien != "pon" || dzien != "wt" || dzien != "sr" || dzien != "czw" || dzien != "pt")
+	if (dzien != "pon" && dzien != "wt" && dzien != "sr" && dzien != "czw" && dzien != "pt")
 	{
 		cout << "Nie ma takiego dnia";
 		return 1;
@@ -913,7 +918,7 @@ int dodaj_zajecie(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup
 		cout << "Nie udalo sie utowrzyc zajec lub konsultacje";
 	}
 }
-void zmien_termin_zajec(list<Zajecia>& lista_zajec, float tym)
+void zmien_termin_zajec(list<Zajecia>& lista_zajec)
 {
 
 	auto it = lista_zajec.begin();
@@ -981,7 +986,7 @@ void zmien_termin_zajec(list<Zajecia>& lista_zajec, float tym)
 			cout << "Bledny zapis";
 	}
 }
-void zmien_miejsce_zajec(list<Zajecia>& lista_zajec, double tym)
+void zmien_miejsce_zajec(list<Zajecia>& lista_zajec)
 {
 	auto wypisz_it = lista_zajec.begin();
 	for (unsigned i = 0; i < lista_zajec.size(); i++)
@@ -1066,7 +1071,7 @@ void usun_zajecie(list<Zajecia>& lista_zajec)
 
 
 }
-void wybierz_modifikacje(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Przedmiot>& lista_przedmiotow, list <Zajecia>& lista_zajec, int tym)
+void wybierz_modifikacje(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Przedmiot>& lista_przedmiotow, list <Zajecia>& lista_zajec)
 {
 	cout << "Wybierz modyfikacje \n";
 	cout << "1. Usun prowadzaecgo\n";
@@ -1081,17 +1086,17 @@ void wybierz_modifikacje(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lis
 	wybor = czy_dobry_znak();
 	switch (wybor)
 	{
-	case 1: usun_prowadzacego(lista_prowadzacych, lista_zajec, 1);
+	case 1: usun_prowadzacego(lista_prowadzacych, lista_zajec);
 		break;
-	case 2: usun_przedmiot(lista_przedmiotow, lista_zajec, 1);
+	case 2: usun_przedmiot(lista_przedmiotow, lista_zajec);
 		break;
 	case 3: usun_zajecie(lista_zajec);
 		break;
-	case 4: dodaj_zajecie(lista_prowadzacych, lista_grup, lista_przedmiotow, lista_zajec, 1);
+	case 4: dodaj_zajecie(lista_prowadzacych, lista_grup, lista_przedmiotow, lista_zajec);
 		break;
-	case 5: zmien_termin_zajec(lista_zajec, 1);
+	case 5: zmien_termin_zajec(lista_zajec);
 		break;
-	case 6: zmien_miejsce_zajec(lista_zajec, 1);
+	case 6: zmien_miejsce_zajec(lista_zajec);
 		break;
 	default:
 		cout << "Nieodpowiednia liczba";
@@ -1100,7 +1105,7 @@ void wybierz_modifikacje(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lis
 	}
 
 }
-pair<list<Przedmiot>, list<Zajecia>>& usun_przedmiot(list<Przedmiot>& lista_przedmiotow, list<Zajecia>& lista_zajec, int tym)
+pair<list<Przedmiot>, list<Zajecia>>& usun_przedmiot(list<Przedmiot>& lista_przedmiotow, list<Zajecia>& lista_zajec)
 {
 	if (lista_przedmiotow.empty()) {
 		cout << "Nie ma zadnych prowadzacych w systemie";
@@ -1142,7 +1147,7 @@ pair<list<Przedmiot>, list<Zajecia>>& usun_przedmiot(list<Przedmiot>& lista_prze
 	auto para = make_pair(lista_przedmiotow, lista_zajec);
 	return para;
 }
-pair<list<Prowadzacy>, list<Zajecia>>& usun_prowadzacego(list<Prowadzacy>& lista_prowadzacych, list<Zajecia>& lista_zajec, int tym)
+pair<list<Prowadzacy>, list<Zajecia>>& usun_prowadzacego(list<Prowadzacy>& lista_prowadzacych, list<Zajecia>& lista_zajec)
 {
 	if (lista_prowadzacych.empty()) {
 		cout << "Nie ma zadnych prowadzacych w systemie";
@@ -1184,9 +1189,9 @@ pair<list<Prowadzacy>, list<Zajecia>>& usun_prowadzacego(list<Prowadzacy>& lista
 	auto para = make_pair(lista_prowadzacych, lista_zajec);
 	return para;
 }
-bool zapisz_prowadzacych(list <Prowadzacy>& lista_prowadzacych, int tym)
+bool zapisz_prowadzacych(list <Prowadzacy>& lista_prowadzacych, string nazwa_pliku_prowadzacych)
 {
-	fstream plik("nowi_prowadzacy.txt", ios::out);
+	fstream plik(nazwa_pliku_prowadzacych, ios::out);
 
 	if (plik.good())
 	{
@@ -1194,7 +1199,7 @@ bool zapisz_prowadzacych(list <Prowadzacy>& lista_prowadzacych, int tym)
 		{
 			string do_zapisu;
 			do_zapisu = to_string(prowadzacy.id);
-			do_zapisu += ".";
+			do_zapisu += " ";
 			do_zapisu += prowadzacy.nazwisko;
 			do_zapisu += " ";
 			do_zapisu += prowadzacy.imie;
@@ -1211,10 +1216,10 @@ bool zapisz_prowadzacych(list <Prowadzacy>& lista_prowadzacych, int tym)
 
 	return true;
 }
-bool zapisz_grupy(list <Grupa>& lista_grup, int tym) // grupy jeszcze sie nie zapisuja, mozliwe ze 
+bool zapisz_grupy(list <Grupa>& lista_grup, string nazwa_pliku_grup) // grupy jeszcze sie nie zapisuja, mozliwe ze 
 //dlatego ze zajecia sie nie zapisuja i dlatego ogolnie jest falsz i program wogle nie zapsiuje nowych prowadzacych tylko sa z poprzedniej kompliacji 
 {
-	fstream plik("nowe_grupy.txt", ios::out);
+	fstream plik( nazwa_pliku_grup, ios::out);
 
 	if (plik.good())
 	{
@@ -1222,7 +1227,7 @@ bool zapisz_grupy(list <Grupa>& lista_grup, int tym) // grupy jeszcze sie nie za
 		{
 			string do_zapisu;
 			do_zapisu = to_string(grupa.id);
-			do_zapisu += ".";
+			do_zapisu += " ";
 			do_zapisu += grupa.nazwa;
 
 			plik << do_zapisu << endl;
@@ -1237,9 +1242,9 @@ bool zapisz_grupy(list <Grupa>& lista_grup, int tym) // grupy jeszcze sie nie za
 
 	return true;
 }
-bool zapisz_zajecia(list <Zajecia>& lista_zajec, list<Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list<Przedmiot>& lista_przedmiotow, float tym)
+bool zapisz_zajecia(list <Zajecia>& lista_zajec, list<Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list<Przedmiot>& lista_przedmiotow, string nazwa_pliku_zajec)
 {
-	fstream plik("nowe_zajecia.txt", ios::out);
+	fstream plik(nazwa_pliku_zajec, ios::out);
 
 	if (plik.good())
 	{
@@ -1267,10 +1272,43 @@ bool zapisz_zajecia(list <Zajecia>& lista_zajec, list<Prowadzacy>& lista_prowadz
 	}
 	return true;
 }
-bool zapisz_wszystko(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Zajecia>& lista_zajec, list<Przedmiot> lista_przedmiotow,int tym)
+bool zapisz_przedmioty(list <Przedmiot>& lista_przedmiotow, string nazwa_pliku_przedmiotow)
+{
+	fstream plik(nazwa_pliku_przedmiotow, ios::out);
+
+	if (plik.good())
+	{
+		for (Przedmiot przedmiot : lista_przedmiotow)
+		{
+			string do_zapisu;
+			do_zapisu = to_string(przedmiot.id);
+			do_zapisu += " ";
+			do_zapisu += przedmiot.nazwa;
+			do_zapisu += " ";
+			do_zapisu += przedmiot.rodzaj;
+			do_zapisu += " ";
+			do_zapisu += to_string(przedmiot.miejsce);
+		
+
+			plik << do_zapisu << endl;
+		}
+		plik.close();
+	}
+	else
+	{
+		cout << " Nie udalo sie zapisac nowych grup";
+		return false;
+	}
+	return true;
+
+}
+bool zapisz_wszystko(list <Prowadzacy>& lista_prowadzacych, list<Grupa>& lista_grup, list <Zajecia>& lista_zajec, list<Przedmiot> lista_przedmiotow,tuple<string,string,string,string> nazwy_plikow)
 {
 	return
-	zapisz_prowadzacych(lista_prowadzacych, 1) &&
-	zapisz_grupy(lista_grup, 1) &&
-	zapisz_zajecia(lista_zajec, lista_prowadzacych, lista_grup, lista_przedmiotow, 1);
+	zapisz_prowadzacych(lista_prowadzacych, get<0>(nazwy_plikow)) &&
+	zapisz_grupy(lista_grup, get<1>(nazwy_plikow)) &&
+    zapisz_przedmioty(lista_przedmiotow, get<2>(nazwy_plikow)) &&
+	zapisz_zajecia(lista_zajec, lista_prowadzacych, lista_grup, lista_przedmiotow, get<3>(nazwy_plikow));
+
+
 }
